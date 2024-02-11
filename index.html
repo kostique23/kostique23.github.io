@@ -58,15 +58,21 @@
     }
 
     async function classifyDrawing() {
-      const canvas = document.getElementById('drawingCanvas');
-      const ctx = canvas.getContext('2d');
-      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const canvas = document.getElementById('drawingCanvas');
+  const ctx = canvas.getContext('2d');
+  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-      const model = await tf.loadLayersModel('model/model.json');
-      const pred = model.predict(await preprocess(imgData)).dataSync();
+  const model = await tf.loadLayersModel('model/model.json');
+  const pred = model.predict(await preprocess(imgData)).dataSync();
 
-      // You can use pred for further processing or display the result
-      console.log(pred);
+  // Находим индекс максимального значения в предсказаниях
+  const maxIndex = pred.indexOf(Math.max(...pred));
+
+  // Получаем класс из индекса
+  const predictedClass = class_names[maxIndex];
+
+  // Выводим предсказанный класс в консоль
+  console.log('Predicted Class:', predictedClass);
     }
   </script>
 </body>
