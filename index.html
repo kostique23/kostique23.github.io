@@ -13,6 +13,7 @@
 
   <script>
     let model;
+    let canvas; // Добавим переменную для элемента canvas
 
     async function loadModel() {
       // Загрузка модели
@@ -34,6 +35,52 @@
     function stopDrawing() {
       mousePressed = false;
     }
+
+    function draw(event) {
+      if (mousePressed) {
+        recordCoor(event);
+        redraw();
+      }
+    }
+
+    function redraw() {
+      const context = canvas.getContext('2d');
+      context.clearRect(0, 0, canvas.width, canvas.height);
+
+      context.beginPath();
+      context.moveTo(coords[0].x, coords[0].y);
+
+      for (let i = 1; i < coords.length; i++) {
+        context.lineTo(coords[i].x, coords[i].y);
+      }
+
+      context.stroke();
+      context.closePath();
+    }
+
+    async function classifyDrawing() {
+      const mbb = getMinBox();
+      const dpi = window.devicePixelRatio;
+      const imgData = canvas.contextContainer.getImageData(mbb.min.x * dpi, mbb.min.y * dpi,
+                                                         (mbb.max.x - mbb.min.x) * dpi, (mbb.max.y - mbb.min.y) * dpi);
+
+      const preprocessed = preprocess(imgData);
+      const pred = model.predict(preprocessed).dataSync();
+
+      // Здесь вы можете использовать результаты pred для отображения или выполнения дополнительных действий
+      console.log(pred);
+    }
+
+    // Ваши функции getMinBox, preprocess и т.д.
+
+    // Добавим инициализацию canvas
+    window.onload = function() {
+      canvas = document.getElementById('drawingCanvas');
+    };
+  </script>
+</body>
+</html>
+
 
     function draw(event) {
       if (mousePressed) {
