@@ -12,68 +12,21 @@
   <button onclick="classifyDrawing()">Classify Drawing</button>
 
   <script>
-    let coords = [];
-    let isDrawing = false;
-    let model;
-
-    async function loadModel() {
-      model = await tf.loadLayersModel('model/model.json');
-    }
-
-    function startDrawing(event) {
-      isDrawing = true;
-      recordCoor(event);
-    }
-
-    function stopDrawing() {
-      isDrawing = false;
-    }
-
-    function draw(event) {
-      if (!isDrawing) return;
-      recordCoor(event);
-    }
-
-    function recordCoor(event) {
-      const canvas = document.getElementById('drawingCanvas');
-      const ctx = canvas.getContext('2d');
-      const rect = canvas.getBoundingClientRect();
-
-      const posX = event.clientX - rect.left;
-      const posY = event.clientY - rect.top;
-
-      coords.push({ x: posX, y: posY });
-
-      ctx.fillStyle = "#000";
-      ctx.beginPath();
-      ctx.arc(posX, posY, 2, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.closePath();
-    }
-
-    async function preprocess(imgData) {
-      return tf.tidy(() => {
-        let tensor = tf.browser.fromPixels(imgData, numChannels = 1);
-        const resized = tf.image.resizeBilinear(tensor, [28, 28]).toFloat();
-        const offset = tf.scalar(255.0);
-        const normalized = tf.scalar(1.0).sub(resized.div(offset));
-        const batched = normalized.expandDims(0);
-        return batched;
-      });
-    }
-
     async function classifyDrawing() {
-      const canvas = document.getElementById('drawingCanvas');
-      const ctx = canvas.getContext('2d');
-      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      // Здесь вам нужно реализовать код для предобработки и классификации изображения
+      const mbb = getMinBox();
+      const dpi = window.devicePixelRatio;
+      const imgData = canvas.contextContainer.getImageData(mbb.min.x * dpi, mbb.min.y * dpi,
+                                                         (mbb.max.x - mbb.min.x) * dpi, (mbb.max.y - mbb.min.y) * dpi);
 
-      const pred = model.predict(await preprocess(imgData)).dataSync();
-      const maxIndex = pred.indexOf(Math.max(...pred));
-      console.log('Predicted Class Index:', maxIndex);
+      const preprocessed = preprocess(imgData);
+      const pred = model.predict(preprocessed).dataSync();
+
+      // Здесь вы можете использовать результаты pred для отображения или выполнения дополнительных действий
+      console.log(pred);
     }
 
-    // Загружаем модель после загрузки страницы
-    window.onload = loadModel;
+    // Ваш код для getMinBox, preprocess, и других функций
   </script>
 </body>
 </html>
