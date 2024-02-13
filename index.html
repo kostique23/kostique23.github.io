@@ -12,8 +12,36 @@
   <button onclick="classifyDrawing()">Classify Drawing</button>
 
   <script>
+    let model;
+
+    async function loadModel() {
+      // Загрузка модели
+      model = await tf.loadLayersModel('model/model.json');
+      console.log('Model loaded');
+    }
+
+    // Вызов функции загрузки модели
+    loadModel();
+
+    let mousePressed = false;
+    let coords = [];
+
+    function startDrawing(event) {
+      mousePressed = true;
+      recordCoor(event);
+    }
+
+    function stopDrawing() {
+      mousePressed = false;
+    }
+
+    function draw(event) {
+      if (mousePressed) {
+        recordCoor(event);
+      }
+    }
+
     async function classifyDrawing() {
-      // Здесь вам нужно реализовать код для предобработки и классификации изображения
       const mbb = getMinBox();
       const dpi = window.devicePixelRatio;
       const imgData = canvas.contextContainer.getImageData(mbb.min.x * dpi, mbb.min.y * dpi,
@@ -26,8 +54,9 @@
       console.log(pred);
     }
 
-    // Ваш код для getMinBox, preprocess, и других функций
+    // Ваши функции getMinBox, preprocess и т.д.
   </script>
 </body>
 </html>
+
 
